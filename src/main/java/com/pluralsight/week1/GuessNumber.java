@@ -1,4 +1,4 @@
-package com.pluralsight;
+package com.pluralsight.week1;
 
 import java.io.FileWriter;
 import java.io.IOException;

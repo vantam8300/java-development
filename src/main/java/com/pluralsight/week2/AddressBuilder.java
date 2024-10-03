@@ -1,8 +1,6 @@
-package com.pluralsight;
+package com.pluralsight.week2;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class AddressBuilder {

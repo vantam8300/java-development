@@ -1,4 +1,4 @@
-package com.pluralsight;
+package com.pluralsight.week2;
 
 import java.util.Scanner;
 
