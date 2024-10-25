@@ -164,11 +164,11 @@ public class UserInterface {
     }
 
     public void processGetAllVehiclesRequest() {
+        displayVehicles(dealerShip.getAllVehicle());
 
     }
 
     public void processAddVehicleRequest() {
-        displayVehicles(dealerShip.getAllVehicle());
     }
 
     public void processRemoveVehicleRequest() {

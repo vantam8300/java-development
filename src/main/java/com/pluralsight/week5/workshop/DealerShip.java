@@ -49,6 +49,7 @@ public class DealerShip {
         this.name = name;
         this.address = address;
         this.phone = phone;
+        this.inventory = new ArrayList<>();
     }
 
     public String getPhone() {
