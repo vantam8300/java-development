@@ -1,6 +1,7 @@
 package com.pluralsight.week5.workshop;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.Scanner;
 public class UserInterface {
     private DealerShip dealerShip;
     static Scanner scanner = new Scanner(System.in);
+    DealershipFileManager fileManager;
+    ContractDataManager contractManager;
+
     // color for the console
     static final String RESET = "\u001B[0m";
     static final String RED = "\u001B[31m";
@@ -20,7 +24,8 @@ public class UserInterface {
     }
 
     private void init() {
-        DealershipFileManager fileManager = new DealershipFileManager();
+        fileManager = new DealershipFileManager();
+        contractManager = new ContractDataManager();
         this.dealerShip = fileManager.getDealership();
     }
 
@@ -84,7 +89,7 @@ public class UserInterface {
         init();
         boolean exit = false;
         while (!exit) {
-            String homeOption = (String) promptUser("1 - Find vehicles within a price range" +
+            String homeOption = (String) promptUser("1 - Find vehicles within a price range\n" +
                     "2 - Find vehicles By make / model\n" +
                     "3 - Find vehicles by year range\n" +
                     "4 - Find vehicles by color\n" +
@@ -93,6 +98,8 @@ public class UserInterface {
                     "7 - List All vehicles\n" +
                     "8 - Add a vehicle\n" +
                     "9 - Remove a vehicle\n" +
+                    "10 - Sale/Lease Vehicle\n" +
+                    "11 - Admin\n" +
                     "99 - Quit\n", "string", false);
 
             switch (Integer.parseInt(homeOption)) {
@@ -123,6 +130,12 @@ public class UserInterface {
                 case 9:
                     processRemoveVehicleRequest();
                     break;
+                case 10:
+                    processSaleLeaseVehicleRequest();
+                    break;
+                case 11:
+                    processAdminRequest();
+                    break;
                 case 99:
                     System.out.println(CYAN + "Thank you for using application" + RESET);
                     exit = true;
@@ -133,6 +146,11 @@ public class UserInterface {
         }
     }
 
+    private void processAdminRequest() {
+        AdminInterface admin = new AdminInterface();
+        admin.display();
+    }
+
     private void displayVehicles(List<Vehicle> vehicles) {
         for (Vehicle v : vehicles) {
             System.out.println(v);
@@ -140,27 +158,37 @@ public class UserInterface {
     }
 
     public void processGetByPriceRequest() {
-
+        double min = (double) promptUser("Min Price ", "double", true);
+        double max = (double) promptUser("Max Price ", "double", true);
+        displayVehicles(dealerShip.getVehicleByPrice(min, max));
     }
 
     public void processGetByMakeModelRequest() {
-
+        String make = (String) promptUser("Make ", "string", true);
+        String model = (String) promptUser("Model ", "string", true);
+        displayVehicles(dealerShip.getVehicleByMakeModel(make, model));
     }
 
     public void processGetByYearRequest() {
-
+        int min = (int) promptUser("Min Year ", "int", true);
+        int max = (int) promptUser("Max Year ", "int", true);
+        displayVehicles(dealerShip.getVehicleByYear(min, max));
     }
 
     public void processGetByColorRequest() {
-
+        String color = (String) promptUser("Color ", "string", true);
+        displayVehicles(dealerShip.getVehicleByColor(color));
     }
 
     public void processGetByMileageRequest() {
-
+        int min = (int) promptUser("Min Mileage ", "int", true);
+        int max = (int) promptUser("Max Mileage ", "int", true);
+        displayVehicles(dealerShip.getVehicleByMileage(min, max));
     }
 
     public void processGetByVehicleTypeRequest() {
-
+        String type = (String) promptUser("Vehicle Type ", "string", true);
+        displayVehicles(dealerShip.getVehicleByType(type));
     }
 
     public void processGetAllVehiclesRequest() {
@@ -168,10 +196,59 @@ public class UserInterface {
 
     }
 
+    public void processSaleLeaseVehicleRequest() {
+        String option = (String) promptUser("Sale or Lease? ", "string", false);
+        String name = (String) promptUser("Customer Name? ", "string", false);
+        String email = (String) promptUser("Customer Email? ", "string", false);
+        int vin = (int) promptUser("Vin? ", "int", false);
+        System.out.println("want to fiance? (true/false) ");
+        boolean fiance = scanner.nextBoolean();
+        scanner.nextLine();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String ld = LocalDate.now().format(dtf);
+
+        Vehicle vehicle = null;
+        for (Vehicle v : dealerShip.getAllVehicle()) {
+            if (v.getVin() == vin) {
+                vehicle = v;
+                dealerShip.removeVehicle(v);
+                break;
+            }
+        }
+        Contract c = null;
+        if (option.equalsIgnoreCase("sale")) {
+            c = new SaleContract(ld, name, email, vehicle, fiance);
+        } else if (option.equalsIgnoreCase("lease")) {
+            c = new LeaseContract(ld, name, email, vehicle);
+        }
+
+        fileManager.saveDealership(dealerShip, false);
+        contractManager.saveContract(c);
+    }
+
     public void processAddVehicleRequest() {
+        int vin = (int) promptUser("Vin ", "int", false);
+        int year = (int) promptUser("Year ", "int", false);
+        String make = (String) promptUser("Make ", "string", false);
+        String model = (String) promptUser("Model ", "string", false);
+        String type = (String) promptUser("Vehicle Type ", "string", false);
+        String color = (String) promptUser("Color ", "string", false);
+        int odo = (int) promptUser("Odo ", "int", false);
+        double price = (double) promptUser("Price ", "double", false);
+        Vehicle v = new Vehicle(vin, year, make, model, type, color, odo, price);
+
+        this.dealerShip.addVehicle(v);
+        fileManager.saveDealership(dealerShip, true);
     }
 
     public void processRemoveVehicleRequest() {
-
+        int vin = (int) promptUser("Vin ", "int", false);
+        for (Vehicle v : dealerShip.getAllVehicle()) {
+            if (v.getVin() == vin) {
+                dealerShip.removeVehicle(v);
+                break;
+            }
+        }
+        fileManager.saveDealership(dealerShip, false);
     }
 }

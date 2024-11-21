@@ -1,9 +1,8 @@
 package com.pluralsight.week5.workshop;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DealershipFileManager {
 
@@ -24,14 +23,37 @@ public class DealershipFileManager {
 
                 dealerShip.addVehicle(vehicle);
             }
-
+            br.close();
             return dealerShip;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void saveDealership(DealerShip dealerShip) {
+    public void saveDealership(DealerShip dealerShip, boolean isAdd) {
+        try {
+            BufferedWriter bw;
+            if (isAdd) {
+                bw = new BufferedWriter(new FileWriter("inventory.csv", true));
+                Vehicle v = dealerShip.getAllVehicle().get(dealerShip.getAllVehicle().size()-1);
+                bw.write(v.getVin() + "|" + v.getYear() + "|" + v.getMake() + "|"+ v.getModel() + "|"+ v.getVehicleType() + "|"+ v.getColor() + "|"+ v.getOdometer() + "|"+ v.getPrice());
+            } else {
+                bw = new BufferedWriter(new FileWriter("inventory.csv"));
+                String name = dealerShip.getName();
+                String address = dealerShip.getAddress();
+                String phone = dealerShip.getPhone();
+                bw.write(name + "|" + address + "|" + phone);
+                bw.newLine();
+                List<Vehicle> vehicles = dealerShip.getAllVehicle();
+                for (Vehicle v : vehicles) {
+                    bw.write(v.getVin() + "|" + v.getYear() + "|" + v.getMake() + "|"+ v.getModel() + "|"+ v.getVehicleType() + "|"+ v.getColor() + "|"+ v.getOdometer() + "|"+ v.getPrice());
+                    bw.newLine();
+                }
+            }
+            bw.close();
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

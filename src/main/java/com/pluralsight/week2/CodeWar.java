@@ -10,24 +10,21 @@ public class CodeWar {
 *
 * */
     public static void main(String[] args) {
-        // your code
-        int n = 10;
-        List<Integer> myList = new ArrayList<>();
-        myList.add(1);
-
-        int index =0;
-        while (myList.size() < n) {
-            int y = 2 * myList.get(index) + 1;
-            int z = 3 * myList.get(index) + 1;
-            myList.add(y);
-            myList.add(z);
-            index++;
-        }
-
-        for (int i : myList) {
-            System.out.print(i + " ");
-
-        }
+        System.out.println(stripComments("apples, pears # and bananas\ngrapes\nbananas !apples", new String[] { "#", "!" } ));
     }
 
+    public static String stripComments(String text, String[] commentSymbols) {
+        String[] lines = text.split("\n");
+        for (int i=0; i < lines.length; i++) {
+            for (String symbol : commentSymbols) {
+                int index = lines[i].indexOf(symbol);
+                if (index != -1) {
+                    lines[i] = lines[i].substring(0, index);
+                }
+            }
+            lines[i] = lines[i].trim();
+        }
+
+        return String.join("\n", lines);
+    }
 }
